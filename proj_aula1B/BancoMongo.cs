@@ -17,7 +17,7 @@ namespace proj_aula1B
 
         public BancoMongo()
         {
-            Connection = "mongodb://root:Mongo@2024#@localhost:27017/mydb";
+            Connection = "mongodb://root:Mongo%402024%23@localhost:27017";
 
             DataBase = "DBPenalidades";
 

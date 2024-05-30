@@ -48,7 +48,10 @@ namespace proj_aula1B
             // enviar os dados recebidos pro Mongo
             // retornar  os meta dados da inserção para uma tabela no sql
 
-            TestFilter.InsertMongo();
+           int records=  TestFilter.InsertMongo();
+
+            TestFilter.InsertMetaDados(records);
+
         }
     }
 }

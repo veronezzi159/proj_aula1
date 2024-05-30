@@ -86,8 +86,10 @@ namespace proj_aula1B
                 
         }
 
-        public static void InsertMongo()
+        public static int InsertMongo()
         {
+            int count = 0;  
+
             Banco banco = new Banco();
             SqlConnection sqlConnection = new SqlConnection(banco.Path());
             sqlConnection.Open();
@@ -96,6 +98,7 @@ namespace proj_aula1B
             cmd.CommandType = System.Data.CommandType.StoredProcedure;
 
             cmd.Connection = sqlConnection;
+            List <BsonDocument> list = new List <BsonDocument>();
 
             using (SqlDataReader reader = cmd.ExecuteReader())
             {
@@ -107,19 +110,7 @@ namespace proj_aula1B
                     string nomeMotorista = reader["NomeMotorista"].ToString() ;
                     string cpf = reader["Cpf"].ToString();
                     DateTime vigencia = DateTime.Parse(reader["VigenciaCadastro"].ToString());
-
                     
-
-                    
-
-
-
-                    BancoMongo dbMongo = new BancoMongo();
-                    var _server = new MongoClient(dbMongo.GetConnection());
-
-                    var client = new MongoClient(dbMongo.GetConnection());
-                    var dataBase = client.GetDatabase(dbMongo.GetDataBase());
-                    var collection = dataBase.GetCollection<BsonDocument>(dbMongo.GetCollection());
 
                     var document = new BsonDocument() {
                     { "Id", Id },
@@ -130,13 +121,42 @@ namespace proj_aula1B
                     {"Data_Vigencia", vigencia }
                     };
 
-                    collection.InsertOne(document);
-                    Console.WriteLine("Inserido com sucesso");
-                    Console.ReadKey();
+                    list.Add(document);
+                    count++;
 
                 }
             }
+
+            BancoMongo dbMongo = new BancoMongo();
+            var _server = new MongoClient(dbMongo.GetConnection());
+
+            var client = new MongoClient(dbMongo.GetConnection());
+            var dataBase = client.GetDatabase(dbMongo.GetDataBase());
+            var collection = dataBase.GetCollection<BsonDocument>(dbMongo.GetCollection());
+
+            collection.InsertMany(list);
+            Console.WriteLine($"{count} registros inseridos com sucesso");
+
+            return count;
         }
 
+        public static void InsertMetaDados(int Records)
+        {
+            Banco banco = new Banco();
+            SqlConnection sqlConnection = new SqlConnection(banco.Path());
+            sqlConnection.Open();
+
+            SqlCommand cmd = new SqlCommand("INSERT INTO MetaDados (Descricao, DataTempo, NumerosDeRegistros)" +
+                " VALUES (@Description, @DateTim, @NumberOfRecords )", sqlConnection);
+
+            cmd.Connection = sqlConnection;
+
+            cmd.Parameters.Add(new SqlParameter("@Description", System.Data.SqlDbType.VarChar, 50)).Value = "Inserção de Dados";
+            cmd.Parameters.Add(new SqlParameter("@DateTim", System.Data.SqlDbType.DateTime)).Value = DateTime.Now;
+            cmd.Parameters.Add(new SqlParameter("@NumberOfRecords", System.Data.SqlDbType.Int)).Value = Records;
+            cmd.ExecuteNonQuery();
+            sqlConnection.Close();
+        }
+        
     }
 }
